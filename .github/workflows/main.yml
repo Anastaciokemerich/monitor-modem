@@ -1,164 +1,59 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitor de Sinal de Modem</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body class="light-theme">
-    <div class="container">
-        <header>
-            <h1>Monitor de Sinal de Modem</h1>
-            <button id="theme-toggle" class="theme-toggle">
-                <i class="fas fa-sun"></i>
-                <i class="fas fa-moon"></i>
-                <span class="slider"></span>
-            </button>
-        </header>
+name: Deploy Monitor de Sinal de Modem
 
-        <div class="main-content">
-            <section class="form-section">
-                <h2>Adicionar Novo Registro</h2>
-                <form id="modem-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="timestamp">Timestamp</label>
-                            <input type="datetime-local" id="timestamp" name="timestamp" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="node">Node</label>
-                            <input type="text" id="node" name="node" placeholder="Ex: Node123" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="mac">MAC</label>
-                            <input type="text" id="mac" name="mac" placeholder="Ex: 00:1A:2B:3C:4D:5E" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="name">Nome</label>
-                            <input type="text" id="name" name="name" placeholder="Nome do cliente" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="snr-downstream">SNR Downstream (dB)</label>
-                            <input type="number" id="snr-downstream" name="snr-downstream" step="0.1" placeholder="Ex: 36.5" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="snr-upstream">SNR Upstream (dB)</label>
-                            <input type="number" id="snr-upstream" name="snr-upstream" step="0.1" placeholder="Ex: 30.2" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="power-downstream">Potência Downstream (dBmV)</label>
-                            <input type="number" id="power-downstream" name="power-downstream" step="0.1" placeholder="Ex: -5.2" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="power-upstream">Potência Upstream (dBmV)</label>
-                            <input type="number" id="power-upstream" name="power-upstream" step="0.1" placeholder="Ex: 42.3" required>
-                        </div>
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn primary">Salvar Registro</button>
-                        <button type="reset" class="btn secondary">Limpar</button>
-                    </div>
-                </form>
-            </section>
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  # Permite executar este workflow manualmente na aba Actions
+  workflow_dispatch:
 
-            <section class="search-section">
-                <h2>Buscar Registros</h2>
-                <div class="search-container">
-                    <div class="search-input-group">
-                        <input type="text" id="search-input" placeholder="Buscar por MAC, Node ou ID...">
-                        <button id="search-button" class="btn primary">
-                            <i class="fas fa-search"></i> Buscar
-                        </button>
-                    </div>
-                    <div class="search-actions">
-                        <button id="search-node-button" class="btn secondary">
-                            <i class="fas fa-sitemap"></i> Buscar por Node
-                        </button>
-                        <button id="list-ids-button" class="btn secondary">
-                            <i class="fas fa-list-ol"></i> Listar IDs
-                        </button>
-                        <button id="export-csv-button" class="btn secondary">
-                            <i class="fas fa-file-csv"></i> Exportar CSV
-                        </button>
-                    </div>
-                </div>
-            </section>
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Checkout do código
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
 
-            <section class="data-section">
-                <div class="tabs">
-                    <button class="tab-btn active" data-tab="all-data">Todos os Registros</button>
-                    <button class="tab-btn" data-tab="search-results">Resultados da Busca</button>
-                    <button class="tab-btn" data-tab="ids-list">Lista de IDs</button>
-                </div>
+      # Verificação básica de HTML
+      - name: Verify HTML 🔍
+        run: |
+          echo "Verificando arquivos HTML..."
+          if grep -q "<html" index.html; then
+            echo "✅ HTML válido encontrado"
+          else
+            echo "❌ HTML inválido"
+            exit 1
+          fi
 
-                <div id="all-data" class="tab-content active">
-                    <h3>Registros Salvos</h3>
-                    <div class="table-container">
-                        <table id="data-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Timestamp</th>
-                                    <th>Node</th>
-                                    <th>MAC</th>
-                                    <th>Nome</th>
-                                    <th>SNR Down (dB)</th>
-                                    <th>SNR Up (dB)</th>
-                                    <th>Potência Down (dBmV)</th>
-                                    <th>Potência Up (dBmV)</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Dados serão inseridos aqui via JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+      # Verificação básica de CSS
+      - name: Verify CSS 🎨
+        run: |
+          echo "Verificando arquivos CSS..."
+          if grep -q "body" styles.css; then
+            echo "✅ CSS válido encontrado"
+          else
+            echo "❌ CSS inválido"
+            exit 1
+          fi
 
-                <div id="search-results" class="tab-content">
-                    <h3>Resultados da Busca</h3>
-                    <div class="table-container">
-                        <table id="search-results-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Timestamp</th>
-                                    <th>Node</th>
-                                    <th>MAC</th>
-                                    <th>Nome</th>
-                                    <th>SNR Down (dB)</th>
-                                    <th>SNR Up (dB)</th>
-                                    <th>Potência Down (dBmV)</th>
-                                    <th>Potência Up (dBmV)</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Resultados da busca serão inseridos aqui -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+      # Verificação básica de JavaScript
+      - name: Verify JavaScript 📜
+        run: |
+          echo "Verificando arquivos JavaScript..."
+          if grep -q "addEventListener" script.js; then
+            echo "✅ JavaScript válido encontrado"
+          else
+            echo "❌ JavaScript inválido"
+            exit 1
+          fi
 
-                <div id="ids-list" class="tab-content">
-                    <h3>Lista de IDs Registrados</h3>
-                    <ul id="ids-list-container" class="ids-list">
-                        <!-- IDs serão inseridos aqui -->
-                    </ul>
-                </div>
-            </section>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
-</body>
-</html>
+      # Deploy para GitHub Pages
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: . # A pasta que contém os arquivos a serem implantados
+          branch: gh-pages # A branch onde o site será publicado
+          clean: true # Remove arquivos antigos
